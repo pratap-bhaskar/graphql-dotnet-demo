@@ -1,0 +1,36 @@
+name: Continuos Integration
+
+# https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request
+on: 
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+
+env:
+  DOTNET_VERSION: 6.0.403
+
+jobs:
+  build:
+    name: Build
+    # https://docs.github.com/en/actions/using-jobs/choosing-the-runner-for-a-job
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      # https://github.com/marketplace?type=actions
+      - name: Setup .Net core sdk version ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal
+
